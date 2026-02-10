@@ -4,6 +4,7 @@ import { THEMES } from '@/constants/themes';
 import { WorkoutRoutine, ThemeConfig } from '@/types/workout';
 import * as htmlToImage from 'html-to-image';
 import WorkoutPreview from '@/components/WorkoutPreview';
+import PdfDayPage from '@/components/PdfDayPage';
 import {
   Dumbbell, Download, Palette, Loader2,
   FileText, ChevronDown, Sparkles,
@@ -12,6 +13,7 @@ import {
 } from 'lucide-react';
 import jsPDF from 'jspdf';
 import { useToast } from '@/hooks/use-toast';
+import { createRoot } from 'react-dom/client';
 
 const DAILY_LIMIT = 30;
 
@@ -199,17 +201,10 @@ const Index: React.FC = () => {
   };
 
   const downloadPDF = async () => {
-    if (!previewRef.current || !workoutData) return;
+    if (!workoutData) return;
     setIsDownloadOpen(false);
     setIsLoading(true);
     setPdfExporting(true);
-
-    // Temporarily switch to desktop mode for A4-style rendering
-    const originalMode = previewMode;
-    setPreviewMode('desktop');
-
-    // Wait for re-render
-    await new Promise(r => setTimeout(r, 500));
 
     try {
       await document.fonts.ready;
@@ -219,54 +214,86 @@ const Index: React.FC = () => {
       const MARGIN_MM = 10;
       const CONTENT_WIDTH_MM = A4_WIDTH_MM - MARGIN_MM * 2;
       const CONTENT_HEIGHT_MM = A4_HEIGHT_MM - MARGIN_MM * 2;
-
       const exportWidth = 1050;
       const pixelRatio = 4;
 
-      const dataUrl = await htmlToImage.toPng(previewRef.current, {
-        quality: 1,
-        backgroundColor: selectedTheme.bg,
-        pixelRatio,
-        width: exportWidth,
-        filter: (node: HTMLElement) => !node.classList?.contains('export-hidden'),
-        style: { direction: 'rtl', margin: '0', display: 'flex', justifyContent: 'center', alignItems: 'flex-start' }
-      });
-
-      const img = new Image();
-      img.src = dataUrl;
-      await new Promise<void>((resolve) => { img.onload = () => resolve(); });
-
-      const imgWidthPx = img.naturalWidth;
-      const imgHeightPx = img.naturalHeight;
-
-      const imgAspect = imgHeightPx / imgWidthPx;
-      const totalHeightMM = CONTENT_WIDTH_MM * imgAspect;
-
       const pdf = new jsPDF('p', 'mm', 'a4');
-      const totalPages = Math.ceil(totalHeightMM / CONTENT_HEIGHT_MM);
+      const totalDays = workoutData.days.length;
 
-      for (let page = 0; page < totalPages; page++) {
-        if (page > 0) pdf.addPage();
+      for (let dIdx = 0; dIdx < totalDays; dIdx++) {
+        if (dIdx > 0) pdf.addPage();
 
-        const srcYStart = (page * CONTENT_HEIGHT_MM / totalHeightMM) * imgHeightPx;
-        const srcYEnd = Math.min(((page + 1) * CONTENT_HEIGHT_MM / totalHeightMM) * imgHeightPx, imgHeightPx);
-        const srcHeight = srcYEnd - srcYStart;
+        // Create a temporary container for this day's page
+        const container = document.createElement('div');
+        container.style.position = 'fixed';
+        container.style.left = '-9999px';
+        container.style.top = '0';
+        container.style.zIndex = '-1';
+        document.body.appendChild(container);
 
-        const canvas = document.createElement('canvas');
-        canvas.width = imgWidthPx;
-        canvas.height = srcHeight;
-        const ctx = canvas.getContext('2d')!;
-        ctx.drawImage(img, 0, srcYStart, imgWidthPx, srcHeight, 0, 0, imgWidthPx, srcHeight);
+        const root = createRoot(container);
+        root.render(
+          <PdfDayPage
+            day={workoutData.days[dIdx]}
+            dayIndex={dIdx}
+            workoutData={workoutData}
+            theme={selectedTheme}
+            nextProgramDate={nextProgramDate}
+            isFirstPage={dIdx === 0}
+            isLastPage={dIdx === totalDays - 1}
+          />
+        );
 
-        const pageImgData = canvas.toDataURL('image/jpeg', 1);
-        const pageHeightMM = (srcHeight / imgHeightPx) * totalHeightMM;
+        // Wait for render
+        await new Promise(r => setTimeout(r, 300));
 
-        pdf.addImage(pageImgData, 'JPEG', MARGIN_MM, MARGIN_MM, CONTENT_WIDTH_MM, pageHeightMM);
+        const pageEl = container.querySelector('.pdf-day-page') as HTMLElement;
+        if (pageEl) {
+          const dataUrl = await htmlToImage.toPng(pageEl, {
+            quality: 1,
+            backgroundColor: selectedTheme.bg,
+            pixelRatio,
+            width: exportWidth,
+            style: { direction: 'rtl' },
+          });
+
+          const img = new Image();
+          img.src = dataUrl;
+          await new Promise<void>(resolve => { img.onload = () => resolve(); });
+
+          const imgAspect = img.naturalHeight / img.naturalWidth;
+          const renderedHeightMM = CONTENT_WIDTH_MM * imgAspect;
+
+          // If content is taller than one page, slice it
+          if (renderedHeightMM > CONTENT_HEIGHT_MM) {
+            const totalPages = Math.ceil(renderedHeightMM / CONTENT_HEIGHT_MM);
+            for (let p = 0; p < totalPages; p++) {
+              if (p > 0) pdf.addPage();
+              const srcYStart = (p * CONTENT_HEIGHT_MM / renderedHeightMM) * img.naturalHeight;
+              const srcYEnd = Math.min(((p + 1) * CONTENT_HEIGHT_MM / renderedHeightMM) * img.naturalHeight, img.naturalHeight);
+              const srcHeight = srcYEnd - srcYStart;
+
+              const canvas = document.createElement('canvas');
+              canvas.width = img.naturalWidth;
+              canvas.height = srcHeight;
+              const ctx = canvas.getContext('2d')!;
+              ctx.drawImage(img, 0, srcYStart, img.naturalWidth, srcHeight, 0, 0, img.naturalWidth, srcHeight);
+
+              const pageData = canvas.toDataURL('image/jpeg', 1);
+              const pageH = (srcHeight / img.naturalHeight) * renderedHeightMM;
+              pdf.addImage(pageData, 'JPEG', MARGIN_MM, MARGIN_MM, CONTENT_WIDTH_MM, pageH);
+            }
+          } else {
+            pdf.addImage(dataUrl, 'PNG', MARGIN_MM, MARGIN_MM, CONTENT_WIDTH_MM, renderedHeightMM);
+          }
+        }
+
+        root.unmount();
+        document.body.removeChild(container);
       }
 
       pdf.save(`${workoutData.type === 'meal' ? 'Diet' : 'Workout'}_Plan.pdf`);
     } finally {
-      setPreviewMode(originalMode);
       setPdfExporting(false);
       setIsLoading(false);
     }
