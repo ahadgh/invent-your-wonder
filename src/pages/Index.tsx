@@ -8,8 +8,9 @@ import {
   Dumbbell, Download, Palette, Loader2,
   FileText, ChevronDown, Sparkles,
   Smartphone, Monitor, Undo2, Redo2,
-  Coffee, Utensils, FileDown, Image as ImageIcon
+  Coffee, Utensils, FileDown, Image as ImageIcon, FileType
 } from 'lucide-react';
+import jsPDF from 'jspdf';
 import { useToast } from '@/hooks/use-toast';
 
 const DAILY_LIMIT = 30;
@@ -169,6 +170,8 @@ const Index: React.FC = () => {
     setDragInfo(null);
   };
 
+  const [pdfExporting, setPdfExporting] = useState(false);
+
   const downloadJPG = async () => {
     if (!previewRef.current) return;
     setIsDownloadOpen(false);
@@ -179,7 +182,7 @@ const Index: React.FC = () => {
       const dataUrl = await htmlToImage.toJpeg(previewRef.current, {
         quality: 1,
         backgroundColor: selectedTheme.bg,
-        pixelRatio: 3,
+        pixelRatio: 4,
         width: exportWidth,
         filter: (node: HTMLElement) => !node.classList?.contains('export-hidden'),
         style: { direction: 'rtl', margin: '0 auto', display: 'flex', justifyContent: 'center', alignItems: 'flex-start' }
@@ -191,6 +194,80 @@ const Index: React.FC = () => {
         link.click();
       }
     } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const downloadPDF = async () => {
+    if (!previewRef.current || !workoutData) return;
+    setIsDownloadOpen(false);
+    setIsLoading(true);
+    setPdfExporting(true);
+
+    // Temporarily switch to desktop mode for A4-style rendering
+    const originalMode = previewMode;
+    setPreviewMode('desktop');
+
+    // Wait for re-render
+    await new Promise(r => setTimeout(r, 500));
+
+    try {
+      await document.fonts.ready;
+
+      const A4_WIDTH_MM = 210;
+      const A4_HEIGHT_MM = 297;
+      const MARGIN_MM = 10;
+      const CONTENT_WIDTH_MM = A4_WIDTH_MM - MARGIN_MM * 2;
+      const CONTENT_HEIGHT_MM = A4_HEIGHT_MM - MARGIN_MM * 2;
+
+      const exportWidth = 1050;
+      const pixelRatio = 4;
+
+      const dataUrl = await htmlToImage.toPng(previewRef.current, {
+        quality: 1,
+        backgroundColor: selectedTheme.bg,
+        pixelRatio,
+        width: exportWidth,
+        filter: (node: HTMLElement) => !node.classList?.contains('export-hidden'),
+        style: { direction: 'rtl', margin: '0', display: 'flex', justifyContent: 'center', alignItems: 'flex-start' }
+      });
+
+      const img = new Image();
+      img.src = dataUrl;
+      await new Promise<void>((resolve) => { img.onload = () => resolve(); });
+
+      const imgWidthPx = img.naturalWidth;
+      const imgHeightPx = img.naturalHeight;
+
+      const imgAspect = imgHeightPx / imgWidthPx;
+      const totalHeightMM = CONTENT_WIDTH_MM * imgAspect;
+
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const totalPages = Math.ceil(totalHeightMM / CONTENT_HEIGHT_MM);
+
+      for (let page = 0; page < totalPages; page++) {
+        if (page > 0) pdf.addPage();
+
+        const srcYStart = (page * CONTENT_HEIGHT_MM / totalHeightMM) * imgHeightPx;
+        const srcYEnd = Math.min(((page + 1) * CONTENT_HEIGHT_MM / totalHeightMM) * imgHeightPx, imgHeightPx);
+        const srcHeight = srcYEnd - srcYStart;
+
+        const canvas = document.createElement('canvas');
+        canvas.width = imgWidthPx;
+        canvas.height = srcHeight;
+        const ctx = canvas.getContext('2d')!;
+        ctx.drawImage(img, 0, srcYStart, imgWidthPx, srcHeight, 0, 0, imgWidthPx, srcHeight);
+
+        const pageImgData = canvas.toDataURL('image/jpeg', 1);
+        const pageHeightMM = (srcHeight / imgHeightPx) * totalHeightMM;
+
+        pdf.addImage(pageImgData, 'JPEG', MARGIN_MM, MARGIN_MM, CONTENT_WIDTH_MM, pageHeightMM);
+      }
+
+      pdf.save(`${workoutData.type === 'meal' ? 'Diet' : 'Workout'}_Plan.pdf`);
+    } finally {
+      setPreviewMode(originalMode);
+      setPdfExporting(false);
       setIsLoading(false);
     }
   };
@@ -258,6 +335,9 @@ const Index: React.FC = () => {
               <div className="absolute left-0 mt-3 w-56 bg-card border rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in">
                 <button onClick={downloadJPG} className="w-full px-4 py-4 text-right hover:bg-accent flex items-center gap-3 text-foreground transition-colors border-b">
                   <ImageIcon size={20} className="text-primary" /> <span className="font-bold text-base">تصویر (JPG)</span>
+                </button>
+                <button onClick={downloadPDF} className="w-full px-4 py-4 text-right hover:bg-accent flex items-center gap-3 text-foreground transition-colors border-b">
+                  <FileType size={20} className="text-red-500" /> <span className="font-bold text-base">PDF (A4)</span>
                 </button>
                 <button onClick={downloadTXT} className="w-full px-4 py-4 text-right hover:bg-accent flex items-center gap-3 text-foreground transition-colors">
                   <FileDown size={20} className="text-emerald-500" /> <span className="font-bold text-base">فایل متنی (TXT)</span>
