@@ -1,6 +1,6 @@
 import React from 'react';
 import { WorkoutDay, WorkoutRoutine, ThemeConfig } from '@/types/workout';
-import { CalendarClock, Dumbbell, Utensils, MessageCircle, Phone, Sparkles } from 'lucide-react';
+import { CalendarClock, Dumbbell, Utensils, MessageCircle, Phone, Sparkles, Flame, Heart, Zap, Target, Trophy } from 'lucide-react';
 
 interface PdfDayPageProps {
   day: WorkoutDay;
@@ -16,39 +16,71 @@ const PdfDayPage: React.FC<PdfDayPageProps> = ({
   day, dayIndex, workoutData, theme, nextProgramDate, isFirstPage, isLastPage
 }) => {
   const isMeal = workoutData.type === 'meal';
+  const decorIcons = [Flame, Heart, Zap, Target, Trophy];
+  const DecorIcon = decorIcons[dayIndex % decorIcons.length];
 
   return (
     <div
       className="pdf-day-page"
       style={{
         width: '1050px',
-        minHeight: '1485px', // A4 ratio at 1050px width
+        minHeight: '1485px',
         backgroundColor: theme.bg,
         color: theme.text,
         direction: 'rtl',
         fontFamily: 'Vazirmatn, sans-serif',
-        padding: '60px 50px',
+        padding: '50px 50px',
         boxSizing: 'border-box',
         display: 'flex',
         flexDirection: 'column',
+        position: 'relative',
+        overflow: 'hidden',
       }}
     >
+      {/* Decorative corner elements */}
+      <div style={{
+        position: 'absolute', top: '20px', left: '20px', opacity: 0.06,
+      }}>
+        <Dumbbell size={120} color={theme.primary} />
+      </div>
+      <div style={{
+        position: 'absolute', bottom: '20px', right: '20px', opacity: 0.06,
+      }}>
+        <DecorIcon size={100} color={theme.primary} />
+      </div>
+      {/* Side accent bar */}
+      <div style={{
+        position: 'absolute', left: 0, top: 0, bottom: 0, width: '6px',
+        background: `linear-gradient(to bottom, ${theme.primary}, ${theme.accent || theme.secondary}, ${theme.primary})`,
+      }} />
+
       {/* Header - only on first page */}
       {isFirstPage && (
-        <div style={{ textAlign: 'center', marginBottom: '40px', borderBottom: `3px solid ${theme.primary}`, paddingBottom: '30px' }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-            {isMeal ? <Utensils size={40} color={theme.primary} /> : <Dumbbell size={40} color={theme.primary} />}
-            <span style={{ fontSize: '36px', fontWeight: 900, color: theme.primary }}>
+        <div style={{
+          textAlign: 'center', marginBottom: '36px',
+          borderBottom: `3px solid ${theme.primary}`, paddingBottom: '28px',
+          background: `linear-gradient(135deg, ${theme.primary}08, ${theme.primary}15, transparent)`,
+          borderRadius: '20px', padding: '30px 40px',
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '14px', marginBottom: '14px' }}>
+            <Flame size={28} color={theme.primary} style={{ opacity: 0.5 }} />
+            {isMeal ? <Utensils size={42} color={theme.primary} /> : <Dumbbell size={42} color={theme.primary} />}
+            <span style={{ fontSize: '38px', fontWeight: 900, color: theme.primary }}>
               {isMeal ? 'برنامه غذایی' : 'برنامه تمرینی'}
             </span>
+            <Flame size={28} color={theme.primary} style={{ opacity: 0.5 }} />
           </div>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '40px', marginTop: '16px', fontSize: '18px', fontWeight: 700 }}>
-            <span>شاگرد: <strong>{workoutData.studentName || '---'}</strong></span>
-            <span>وزن: <strong>{workoutData.studentWeight || '---'}</strong></span>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '40px', marginTop: '14px', fontSize: '18px', fontWeight: 700 }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <Target size={18} color={theme.primary} /> شاگرد: <strong>{workoutData.studentName || '---'}</strong>
+            </span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <Zap size={18} color={theme.primary} /> وزن: <strong>{workoutData.studentWeight || '---'}</strong>
+            </span>
           </div>
           <div style={{
             display: 'inline-flex', alignItems: 'center', gap: '8px',
-            marginTop: '16px', padding: '8px 24px', borderRadius: '10px',
+            marginTop: '16px', padding: '10px 28px', borderRadius: '12px',
             backgroundColor: theme.primary, color: theme.tableHeaderColor,
             fontSize: '14px', fontWeight: 800,
           }}>
@@ -57,20 +89,38 @@ const PdfDayPage: React.FC<PdfDayPageProps> = ({
         </div>
       )}
 
-      {/* Day Title */}
+      {/* Day Title with badge */}
       <div style={{
-        fontSize: '28px', fontWeight: 900, color: theme.primary,
-        borderRight: `6px solid ${theme.primary}`, paddingRight: '16px',
-        marginBottom: '20px',
+        display: 'flex', alignItems: 'center', gap: '14px',
+        marginBottom: '22px',
       }}>
-        {day.dayName}
+        <div style={{
+          background: `linear-gradient(135deg, ${theme.primary}, ${theme.accent || theme.primary}cc)`,
+          borderRadius: '14px', padding: '10px 14px',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          <DecorIcon size={26} color={theme.tableHeaderColor || '#fff'} />
+        </div>
+        <div style={{
+          fontSize: '26px', fontWeight: 900, color: theme.primary,
+          borderRight: `5px solid ${theme.primary}`, paddingRight: '14px',
+        }}>
+          {day.dayName}
+        </div>
+        <div style={{
+          marginRight: 'auto', fontSize: '13px', fontWeight: 700,
+          backgroundColor: theme.secondary, padding: '6px 16px', borderRadius: '20px',
+          color: theme.primary,
+        }}>
+          {day.exercises.length} {isMeal ? 'آیتم' : 'حرکت'}
+        </div>
       </div>
 
-      {/* Bootstrap-style Table */}
+      {/* Table */}
       {isMeal ? (
         <table style={{
           width: '100%', borderCollapse: 'collapse', fontSize: '16px',
-          border: `2px solid ${theme.secondary}`,
+          border: `2px solid ${theme.secondary}`, borderRadius: '12px', overflow: 'hidden',
         }}>
           <thead>
             <tr>
@@ -82,7 +132,7 @@ const PdfDayPage: React.FC<PdfDayPageProps> = ({
           <tbody>
             {day.exercises.map((ex, idx) => (
               <tr key={idx} style={{ backgroundColor: idx % 2 === 0 ? theme.rowEven : theme.rowOdd }}>
-                <td style={tdStyle(theme)}>{idx + 1}</td>
+                <td style={{ ...tdStyle(theme), textAlign: 'center', fontWeight: 800, color: theme.primary }}>{idx + 1}</td>
                 <td style={{ ...tdStyle(theme), fontWeight: 800, color: theme.primary }}>{ex.name}</td>
                 <td style={{ ...tdStyle(theme), lineHeight: 1.8 }}>{ex.sets}</td>
               </tr>
@@ -92,7 +142,7 @@ const PdfDayPage: React.FC<PdfDayPageProps> = ({
       ) : (
         <table style={{
           width: '100%', borderCollapse: 'collapse', fontSize: '16px',
-          border: `2px solid ${theme.secondary}`,
+          border: `2px solid ${theme.secondary}`, borderRadius: '12px', overflow: 'hidden',
         }}>
           <thead>
             <tr>
@@ -106,8 +156,13 @@ const PdfDayPage: React.FC<PdfDayPageProps> = ({
           <tbody>
             {day.exercises.map((ex, idx) => (
               <tr key={idx} style={{ backgroundColor: idx % 2 === 0 ? theme.rowEven : theme.rowOdd }}>
-                <td style={tdStyle(theme)}>{idx + 1}</td>
-                <td style={{ ...tdStyle(theme), fontWeight: 800, color: theme.primary }}>{ex.name}</td>
+                <td style={{ ...tdStyle(theme), textAlign: 'center', fontWeight: 800, color: theme.primary }}>{idx + 1}</td>
+                <td style={{ ...tdStyle(theme), fontWeight: 800, color: theme.primary }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <Dumbbell size={14} color={theme.primary} style={{ opacity: 0.4, flexShrink: 0 }} />
+                    {ex.name}
+                  </span>
+                </td>
                 <td style={{ ...tdStyle(theme), textAlign: 'center' }}>{ex.sets}</td>
                 <td style={{ ...tdStyle(theme), textAlign: 'center' }}>{ex.reps}</td>
                 <td style={{ ...tdStyle(theme), textAlign: 'center' }}>{ex.rest}</td>
@@ -122,7 +177,11 @@ const PdfDayPage: React.FC<PdfDayPageProps> = ({
         <div style={{
           marginTop: '30px', padding: '24px', borderRadius: '16px',
           backgroundColor: theme.secondary, borderRight: `8px solid ${theme.primary}`,
+          position: 'relative', overflow: 'hidden',
         }}>
+          <div style={{ position: 'absolute', top: '10px', left: '10px', opacity: 0.06 }}>
+            <Trophy size={60} color={theme.primary} />
+          </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 900, fontSize: '20px', color: theme.primary, marginBottom: '12px' }}>
             <Sparkles size={22} /> نکات طلایی
           </div>
