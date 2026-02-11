@@ -174,6 +174,13 @@ const Index: React.FC = () => {
 
   const [pdfExporting, setPdfExporting] = useState(false);
 
+  const getFileName = (ext: string) => {
+    const prefix = workoutData?.type === 'meal' ? 'Diet' : 'Workout';
+    const name = workoutData?.studentName?.trim();
+    const safeName = name ? `_${name.replace(/[^\w\u0600-\u06FF\s]/g, '').replace(/\s+/g, '_')}` : '';
+    return `${prefix}${safeName}.${ext}`;
+  };
+
   const downloadJPG = async () => {
     if (!previewRef.current) return;
     setIsDownloadOpen(false);
@@ -182,9 +189,9 @@ const Index: React.FC = () => {
       await document.fonts.ready;
       const exportWidth = isMobile ? 450 : 1050;
       const dataUrl = await htmlToImage.toJpeg(previewRef.current, {
-        quality: 1,
+        quality: 0.92,
         backgroundColor: selectedTheme.bg,
-        pixelRatio: 4,
+        pixelRatio: 3,
         width: exportWidth,
         filter: (node: HTMLElement) => !node.classList?.contains('export-hidden'),
         style: { direction: 'rtl', margin: '0 auto', display: 'flex', justifyContent: 'center', alignItems: 'flex-start' }
@@ -192,7 +199,7 @@ const Index: React.FC = () => {
       if (dataUrl) {
         const link = document.createElement('a');
         link.href = dataUrl;
-        link.download = `${workoutData?.type === 'meal' ? 'Diet' : 'Workout'}_Plan.jpg`;
+        link.download = getFileName('jpg');
         link.click();
       }
     } finally {
@@ -215,7 +222,7 @@ const Index: React.FC = () => {
       const CONTENT_WIDTH_MM = A4_WIDTH_MM - MARGIN_MM * 2;
       const CONTENT_HEIGHT_MM = A4_HEIGHT_MM - MARGIN_MM * 2;
       const exportWidth = 1050;
-      const pixelRatio = 4;
+      const pixelRatio = 2;
 
       const pdf = new jsPDF('p', 'mm', 'a4');
       const totalDays = workoutData.days.length;
@@ -249,8 +256,8 @@ const Index: React.FC = () => {
 
         const pageEl = container.querySelector('.pdf-day-page') as HTMLElement;
         if (pageEl) {
-          const dataUrl = await htmlToImage.toPng(pageEl, {
-            quality: 1,
+          const dataUrl = await htmlToImage.toJpeg(pageEl, {
+            quality: 0.85,
             backgroundColor: selectedTheme.bg,
             pixelRatio,
             width: exportWidth,
@@ -279,12 +286,12 @@ const Index: React.FC = () => {
               const ctx = canvas.getContext('2d')!;
               ctx.drawImage(img, 0, srcYStart, img.naturalWidth, srcHeight, 0, 0, img.naturalWidth, srcHeight);
 
-              const pageData = canvas.toDataURL('image/jpeg', 1);
+              const pageData = canvas.toDataURL('image/jpeg', 0.85);
               const pageH = (srcHeight / img.naturalHeight) * renderedHeightMM;
               pdf.addImage(pageData, 'JPEG', MARGIN_MM, MARGIN_MM, CONTENT_WIDTH_MM, pageH);
             }
           } else {
-            pdf.addImage(dataUrl, 'PNG', MARGIN_MM, MARGIN_MM, CONTENT_WIDTH_MM, renderedHeightMM);
+            pdf.addImage(dataUrl, 'JPEG', MARGIN_MM, MARGIN_MM, CONTENT_WIDTH_MM, renderedHeightMM);
           }
         }
 
@@ -292,7 +299,7 @@ const Index: React.FC = () => {
         document.body.removeChild(container);
       }
 
-      pdf.save(`${workoutData.type === 'meal' ? 'Diet' : 'Workout'}_Plan.pdf`);
+      pdf.save(getFileName('pdf'));
     } finally {
       setPdfExporting(false);
       setIsLoading(false);
@@ -330,7 +337,7 @@ const Index: React.FC = () => {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `${isMealType ? 'Diet' : 'Workout'}_Plan.txt`;
+    link.download = getFileName('txt');
     link.click();
     URL.revokeObjectURL(url);
   };
