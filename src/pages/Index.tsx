@@ -236,55 +236,32 @@ const Index: React.FC = () => {
       const CONTENT_WIDTH_MM = A4_WIDTH_MM - MARGIN_MM * 2;
       const CONTENT_HEIGHT_MM = A4_HEIGHT_MM - MARGIN_MM * 2;
       const exportWidth = 1050;
-      const pixelRatio = 2;
+      const pixelRatio = 3;
 
       const pdf = new jsPDF('p', 'mm', 'a4');
       const totalDays = workoutData.days.length;
       const isMealType = workoutData.type === 'meal';
 
-      // Group days into pages: for meals try to pack multiple, for workout 1 per page
+      // Group days into pages: try to pack multiple days per page for both types
       const pageGroups: { days: typeof workoutData.days; startIndex: number }[] = [];
-      if (isMealType) {
-        // Try packing: render each day to measure height, then bin-pack
-        const dayHeights: number[] = [];
-        for (let i = 0; i < totalDays; i++) {
-          const container = document.createElement('div');
-          container.style.cssText = 'position:fixed;left:-9999px;top:0;z-index:-1';
-          document.body.appendChild(container);
-          const root = createRoot(container);
-          root.render(
-            <PdfDayPage days={[workoutData.days[i]]} startIndex={i} workoutData={workoutData} theme={selectedTheme} nextProgramDate={nextProgramDate} isFirstPage={false} isLastPage={false} />
-          );
-          await new Promise(r => setTimeout(r, 200));
-          const el = container.querySelector('.pdf-day-page') as HTMLElement;
-          dayHeights.push(el ? el.scrollHeight : 1485);
-          root.unmount();
-          document.body.removeChild(container);
-        }
-        // Bin-pack days into pages (max height ~1485px with some header/footer room)
-        const maxH = 1350;
-        let currentGroup: number[] = [];
-        let currentH = 0;
-        for (let i = 0; i < totalDays; i++) {
-          // estimate: each day table uses ~(exercises * 45 + 120)px
-          const estH = workoutData.days[i].exercises.length * 45 + 140;
-          if (currentGroup.length > 0 && currentH + estH > maxH) {
-            pageGroups.push({ days: currentGroup.map(idx => workoutData.days[idx]), startIndex: currentGroup[0] });
-            currentGroup = [i];
-            currentH = estH;
-          } else {
-            currentGroup.push(i);
-            currentH += estH;
-          }
-        }
-        if (currentGroup.length > 0) {
+      const rowHeight = isMealType ? 45 : 50;
+      const dayOverhead = 80; // title + spacing per day
+      const maxH = 1350;
+      let currentGroup: number[] = [];
+      let currentH = 0;
+      for (let i = 0; i < totalDays; i++) {
+        const estH = workoutData.days[i].exercises.length * rowHeight + dayOverhead;
+        if (currentGroup.length > 0 && currentH + estH > maxH) {
           pageGroups.push({ days: currentGroup.map(idx => workoutData.days[idx]), startIndex: currentGroup[0] });
+          currentGroup = [i];
+          currentH = estH;
+        } else {
+          currentGroup.push(i);
+          currentH += estH;
         }
-      } else {
-        // Workout: 1 day per page
-        for (let i = 0; i < totalDays; i++) {
-          pageGroups.push({ days: [workoutData.days[i]], startIndex: i });
-        }
+      }
+      if (currentGroup.length > 0) {
+        pageGroups.push({ days: currentGroup.map(idx => workoutData.days[idx]), startIndex: currentGroup[0] });
       }
 
       for (let pIdx = 0; pIdx < pageGroups.length; pIdx++) {
@@ -313,7 +290,7 @@ const Index: React.FC = () => {
         const pageEl = container.querySelector('.pdf-day-page') as HTMLElement;
         if (pageEl) {
           const dataUrl = await htmlToImage.toJpeg(pageEl, {
-            quality: 0.85,
+            quality: 0.92,
             backgroundColor: selectedTheme.bg,
             pixelRatio,
             width: exportWidth,
@@ -339,7 +316,7 @@ const Index: React.FC = () => {
               canvas.height = srcHeight;
               const ctx = canvas.getContext('2d')!;
               ctx.drawImage(img, 0, srcYStart, img.naturalWidth, srcHeight, 0, 0, img.naturalWidth, srcHeight);
-              const pageData = canvas.toDataURL('image/jpeg', 0.85);
+              const pageData = canvas.toDataURL('image/jpeg', 0.92);
               const pageH = (srcHeight / img.naturalHeight) * renderedHeightMM;
               pdf.addImage(pageData, 'JPEG', MARGIN_MM, MARGIN_MM, CONTENT_WIDTH_MM, pageH);
             }
