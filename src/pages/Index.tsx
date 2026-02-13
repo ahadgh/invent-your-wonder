@@ -244,17 +244,19 @@ const Index: React.FC = () => {
 
       // Group days into pages: try to pack multiple days per page for both types
       const pageGroups: { days: typeof workoutData.days; startIndex: number }[] = [];
-      const rowHeight = isMealType ? 45 : 50;
-      const dayOverhead = 80; // title + spacing per day
-      const maxH = 1350;
+      const rowHeight = isMealType ? 38 : 42;
+      const dayOverhead = 70; // title + spacing per day
+      const headerHeight = 220; // header on first page
+      const footerHeight = 80;
+      const pageMaxH = 1400;
       let currentGroup: number[] = [];
-      let currentH = 0;
+      let currentH = headerHeight; // first page starts with header
       for (let i = 0; i < totalDays; i++) {
         const estH = workoutData.days[i].exercises.length * rowHeight + dayOverhead;
-        if (currentGroup.length > 0 && currentH + estH > maxH) {
+        if (currentGroup.length > 0 && currentH + estH > pageMaxH) {
           pageGroups.push({ days: currentGroup.map(idx => workoutData.days[idx]), startIndex: currentGroup[0] });
           currentGroup = [i];
-          currentH = estH;
+          currentH = estH; // subsequent pages have no header
         } else {
           currentGroup.push(i);
           currentH += estH;
