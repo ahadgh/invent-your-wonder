@@ -242,28 +242,44 @@ const Index: React.FC = () => {
       const totalDays = workoutData.days.length;
       const isMealType = workoutData.type === 'meal';
 
-      // Group days into pages: try to pack multiple days per page for both types
+      // Group days into pages: for 5 or fewer days, force exactly 2 pages
       const pageGroups: { days: typeof workoutData.days; startIndex: number }[] = [];
-      const rowHeight = isMealType ? 48 : 52;
-      const dayOverhead = 90; // title + spacing per day
-      const headerHeight = 260; // header on first page
-      const footerHeight = 100;
-      const pageUsableH = 1380; // usable content area within 1485px page (after padding)
-      let currentGroup: number[] = [];
-      let currentH = headerHeight; // first page starts with header
-      for (let i = 0; i < totalDays; i++) {
-        const estH = workoutData.days[i].exercises.length * rowHeight + dayOverhead;
-        if (currentGroup.length > 0 && currentH + estH > pageUsableH) {
-          pageGroups.push({ days: currentGroup.map(idx => workoutData.days[idx]), startIndex: currentGroup[0] });
-          currentGroup = [i];
-          currentH = estH; // subsequent pages have no header
-        } else {
-          currentGroup.push(i);
-          currentH += estH;
+      
+      if (totalDays <= 5 && totalDays > 1) {
+        // Force 2 pages: first page gets ceil(totalDays/2), second gets the rest
+        const firstPageCount = Math.ceil(totalDays / 2);
+        pageGroups.push({
+          days: workoutData.days.slice(0, firstPageCount),
+          startIndex: 0
+        });
+        pageGroups.push({
+          days: workoutData.days.slice(firstPageCount),
+          startIndex: firstPageCount
+        });
+      } else if (totalDays === 1) {
+        pageGroups.push({ days: workoutData.days, startIndex: 0 });
+      } else {
+        // For 6+ days, use packing algorithm
+        const rowHeight = isMealType ? 42 : 46;
+        const dayOverhead = 80;
+        const headerHeight = 240;
+        const pageUsableH = 1400;
+        let currentGroup: number[] = [];
+        let currentH = headerHeight;
+        for (let i = 0; i < totalDays; i++) {
+          const estH = workoutData.days[i].exercises.length * rowHeight + dayOverhead;
+          if (currentGroup.length > 0 && currentH + estH > pageUsableH) {
+            pageGroups.push({ days: currentGroup.map(idx => workoutData.days[idx]), startIndex: currentGroup[0] });
+            currentGroup = [i];
+            currentH = estH;
+          } else {
+            currentGroup.push(i);
+            currentH += estH;
+          }
         }
-      }
-      if (currentGroup.length > 0) {
-        pageGroups.push({ days: currentGroup.map(idx => workoutData.days[idx]), startIndex: currentGroup[0] });
+        if (currentGroup.length > 0) {
+          pageGroups.push({ days: currentGroup.map(idx => workoutData.days[idx]), startIndex: currentGroup[0] });
+        }
       }
 
       for (let pIdx = 0; pIdx < pageGroups.length; pIdx++) {
