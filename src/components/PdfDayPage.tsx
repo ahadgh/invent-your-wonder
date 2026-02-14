@@ -108,7 +108,7 @@ const PdfDayPage: React.FC<PdfDayPageProps> = ({
       )}
 
       {/* Day sections */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '20px', position: 'relative', zIndex: 1 }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', gap: '18px', position: 'relative', zIndex: 1 }}>
         {days.map((day, i) => {
           const dayIndex = startIndex + i;
           const DecorIcon = decorIcons[dayIndex % decorIcons.length];
