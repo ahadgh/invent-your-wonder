@@ -32,6 +32,10 @@ Rules for WORKOUT:
 - "rest" should be rest time.
 
 If there's a student name, extract it. If there's a weight, extract it.
+If there's a height (قد), extract it into "studentHeight".
+If there's a BMI, extract it into "studentBMI".
+If there's a goal (هدف), extract it into "studentGoal".
+Only include these fields if they exist in the text. Do NOT make them up.
 If there are golden tips or notes, put them in "tips" field.
 
 IMPORTANT: You MUST respond using the suggest_workout_data tool.`;
@@ -60,6 +64,9 @@ IMPORTANT: You MUST respond using the suggest_workout_data tool.`;
                   type: { type: "string", enum: ["workout", "meal"] },
                   studentName: { type: "string" },
                   studentWeight: { type: "string" },
+                  studentHeight: { type: "string" },
+                  studentBMI: { type: "string" },
+                  studentGoal: { type: "string" },
                   tips: { type: "string" },
                   days: {
                     type: "array",

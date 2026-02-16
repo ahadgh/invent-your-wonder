@@ -88,13 +88,28 @@ const PdfDayPage: React.FC<PdfDayPageProps> = ({
             </span>
             <Flame size={24} color={theme.primary} style={{ opacity: 0.5 }} />
           </div>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '36px', marginTop: '10px', fontSize: '16px', fontWeight: 700 }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '24px', marginTop: '10px', fontSize: '16px', fontWeight: 700 }}>
             <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <Target size={16} color={theme.primary} /> شاگرد: <strong>{workoutData.studentName || '---'}</strong>
             </span>
             <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <Zap size={16} color={theme.primary} /> وزن: <strong>{workoutData.studentWeight || '---'}</strong>
             </span>
+            {workoutData.studentHeight && (
+              <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Zap size={16} color={theme.primary} /> قد: <strong>{workoutData.studentHeight}</strong>
+              </span>
+            )}
+            {workoutData.studentBMI && (
+              <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Target size={16} color={theme.primary} /> BMI: <strong>{workoutData.studentBMI}</strong>
+              </span>
+            )}
+            {workoutData.studentGoal && (
+              <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Trophy size={16} color={theme.primary} /> هدف: <strong>{workoutData.studentGoal}</strong>
+              </span>
+            )}
           </div>
           <div style={{
             display: 'inline-flex', alignItems: 'center', gap: '8px',

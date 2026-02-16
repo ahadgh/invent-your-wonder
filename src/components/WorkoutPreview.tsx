@@ -63,6 +63,24 @@ const WorkoutPreview: React.FC<WorkoutPreviewProps> = ({
               <div className="flex items-center gap-2 opacity-50 font-bold tracking-tight">وزن:</div>
               <span onBlur={(e) => onUpdateField(['studentWeight'], e.currentTarget.innerText)} contentEditable suppressContentEditableWarning className="font-black outline-none">{workoutData.studentWeight || '---'}</span>
             </div>
+            {workoutData.studentHeight && (
+              <div className={`rounded-2xl border flex items-center justify-between ${isMobile ? 'px-5 py-3.5 text-base' : 'px-7 py-5 text-xl'}`} style={{ backgroundColor: selectedTheme.bg, borderColor: selectedTheme.secondary }}>
+                <div className="flex items-center gap-2 opacity-50 font-bold tracking-tight">قد:</div>
+                <span onBlur={(e) => onUpdateField(['studentHeight'], e.currentTarget.innerText)} contentEditable suppressContentEditableWarning className="font-black outline-none">{workoutData.studentHeight}</span>
+              </div>
+            )}
+            {workoutData.studentBMI && (
+              <div className={`rounded-2xl border flex items-center justify-between ${isMobile ? 'px-5 py-3.5 text-base' : 'px-7 py-5 text-xl'}`} style={{ backgroundColor: selectedTheme.bg, borderColor: selectedTheme.secondary }}>
+                <div className="flex items-center gap-2 opacity-50 font-bold tracking-tight">BMI:</div>
+                <span onBlur={(e) => onUpdateField(['studentBMI'], e.currentTarget.innerText)} contentEditable suppressContentEditableWarning className="font-black outline-none">{workoutData.studentBMI}</span>
+              </div>
+            )}
+            {workoutData.studentGoal && (
+              <div className={`rounded-2xl border flex items-center justify-between ${isMobile ? 'px-5 py-3.5 text-base' : 'px-7 py-5 text-xl'}`} style={{ backgroundColor: selectedTheme.bg, borderColor: selectedTheme.secondary }}>
+                <div className="flex items-center gap-2 opacity-50 font-bold tracking-tight">هدف:</div>
+                <span onBlur={(e) => onUpdateField(['studentGoal'], e.currentTarget.innerText)} contentEditable suppressContentEditableWarning className="font-black outline-none">{workoutData.studentGoal}</span>
+              </div>
+            )}
           </div>
 
           <div className={`inline-flex items-center gap-3 ${isMobile ? 'px-5 py-2.5 text-[13px]' : 'px-10 py-4 text-base'} rounded-xl font-black shadow-xl`} style={{ backgroundColor: selectedTheme.primary, color: selectedTheme.tableHeaderColor }}>
