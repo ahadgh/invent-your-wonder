@@ -361,6 +361,9 @@ const Index: React.FC = () => {
     let text = `🌟 ${isMealType ? 'برنامه غذایی' : 'برنامه تمرینی'} اختصاصی 🌟\n`;
     text += `👤 نام شاگرد: ${workoutData.studentName || '---'}\n`;
     text += `⚖️ وزن: ${workoutData.studentWeight || '---'}\n`;
+    if (workoutData.studentHeight) text += `📏 قد: ${workoutData.studentHeight}\n`;
+    if (workoutData.studentBMI) text += `📊 BMI: ${workoutData.studentBMI}\n`;
+    if (workoutData.studentGoal) text += `🎯 هدف: ${workoutData.studentGoal}\n`;
     text += `📅 تاریخ تمدید: ${nextProgramDate}\n\n`;
     text += `--------------------------------\n\n`;
     workoutData.days.forEach(day => {

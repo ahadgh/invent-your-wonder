@@ -15,6 +15,9 @@ export interface WorkoutRoutine {
   type: 'workout' | 'meal';
   studentName?: string;
   studentWeight?: string;
+  studentHeight?: string;
+  studentBMI?: string;
+  studentGoal?: string;
   days: WorkoutDay[];
   tips?: string;
 }
