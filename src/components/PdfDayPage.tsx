@@ -1,6 +1,6 @@
 import React from 'react';
 import { WorkoutDay, WorkoutRoutine, ThemeConfig } from '@/types/workout';
-import { CalendarClock, Dumbbell, Utensils, MessageCircle, Phone, Sparkles, Flame, Heart, Zap, Target, Trophy } from 'lucide-react';
+import { CalendarClock, Dumbbell, Utensils, MessageCircle, Phone, Sparkles, Flame, Heart, Zap, Target, Trophy, Pill } from 'lucide-react';
 
 interface PdfDayPageProps {
   days: WorkoutDay[];
@@ -215,6 +215,35 @@ const PdfDayPage: React.FC<PdfDayPageProps> = ({
           );
         })}
       </div>
+
+      {/* Supplements - only on last page */}
+      {isLastPage && workoutData.supplements && workoutData.supplements.length > 0 && (
+        <div style={{
+          marginTop: '20px', padding: '18px', borderRadius: '12px', position: 'relative', zIndex: 1,
+          backgroundColor: theme.secondary, borderRight: `6px solid ${theme.primary}`,
+          overflow: 'hidden',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 900, fontSize: '18px', color: theme.primary, marginBottom: '10px' }}>
+            <Pill size={18} /> مکمل‌های پیشنهادی
+          </div>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px', border: `2px solid ${theme.primary}30`, borderRadius: '10px', overflow: 'hidden' }}>
+            <thead>
+              <tr>
+                <th style={{ ...thStyle(theme), width: '200px' }}>مکمل</th>
+                <th style={thStyle(theme)}>نحوه مصرف</th>
+              </tr>
+            </thead>
+            <tbody>
+              {workoutData.supplements.map((sup, idx) => (
+                <tr key={idx} style={{ backgroundColor: idx % 2 === 0 ? theme.rowEven : theme.rowOdd }}>
+                  <td style={{ ...tdStyle(theme), fontWeight: 800, color: theme.primary }}>{sup.name}</td>
+                  <td style={tdStyle(theme)}>{sup.usage}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {/* Tips - only on last page */}
       {isLastPage && workoutData.tips && (

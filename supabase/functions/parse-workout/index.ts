@@ -37,6 +37,7 @@ If there's a BMI, extract it into "studentBMI".
 If there's a goal (هدف), extract it into "studentGoal".
 Only include these fields if they exist in the text. Do NOT make them up.
 If there are golden tips or notes, put them in "tips" field.
+If there are supplements (مکمل) mentioned, extract them into "supplements" array with "name" (supplement name) and "usage" (how and when to use). Only include if explicitly mentioned in the text.
 
 IMPORTANT: You MUST respond using the suggest_workout_data tool.`;
 
@@ -68,6 +69,18 @@ IMPORTANT: You MUST respond using the suggest_workout_data tool.`;
                   studentBMI: { type: "string" },
                   studentGoal: { type: "string" },
                   tips: { type: "string" },
+                  supplements: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        name: { type: "string" },
+                        usage: { type: "string" }
+                      },
+                      required: ["name", "usage"],
+                      additionalProperties: false
+                    }
+                  },
                   days: {
                     type: "array",
                     items: {

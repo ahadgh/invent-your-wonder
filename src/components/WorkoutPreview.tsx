@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { WorkoutRoutine, ThemeConfig } from '@/types/workout';
 import {
   Dumbbell, Utensils, CalendarClock, GripVertical, Trash2, Plus, Sparkles,
-  MessageCircle, Phone
+  MessageCircle, Phone, Pill
 } from 'lucide-react';
 
 interface WorkoutPreviewProps {
@@ -160,6 +160,48 @@ const WorkoutPreview: React.FC<WorkoutPreviewProps> = ({
             </div>
           ))}
         </div>
+
+        {/* Supplements */}
+        {workoutData.supplements && workoutData.supplements.length > 0 && (
+          <div className={`w-full ${isMobile ? 'mt-10 p-7 rounded-[30px]' : 'mt-20 p-14 rounded-[50px]'} border-r-[12px] shadow-2xl relative transition-all duration-300`} style={{ backgroundColor: selectedTheme.secondary, borderColor: selectedTheme.primary }}>
+            <h4 className="flex items-center gap-3 font-black text-2xl mb-5" style={{ color: selectedTheme.primary }}><Pill size={28} /> مکمل‌های پیشنهادی</h4>
+            <table className="w-full" style={{ borderCollapse: 'collapse' }}>
+              <thead>
+                <tr>
+                  <th className={`text-right font-black ${isMobile ? 'text-sm px-3 py-2' : 'text-lg px-5 py-3'}`} style={{ backgroundColor: selectedTheme.primary, color: selectedTheme.tableHeaderColor, borderRadius: '8px 0 0 0' }}>مکمل</th>
+                  <th className={`text-right font-black ${isMobile ? 'text-sm px-3 py-2' : 'text-lg px-5 py-3'}`} style={{ backgroundColor: selectedTheme.primary, color: selectedTheme.tableHeaderColor, borderRadius: '0 8px 0 0' }}>نحوه مصرف</th>
+                  <th className="w-10 export-hidden" style={{ backgroundColor: selectedTheme.primary, borderRadius: '0' }}></th>
+                </tr>
+              </thead>
+              <tbody>
+                {workoutData.supplements.map((sup, idx) => (
+                  <tr key={idx} style={{ backgroundColor: idx % 2 === 0 ? selectedTheme.rowEven : selectedTheme.rowOdd }}>
+                    <td className={`font-bold ${isMobile ? 'text-sm px-3 py-2' : 'text-base px-5 py-3'}`} style={{ borderBottom: `1px solid ${selectedTheme.primary}20` }}>
+                      <span onBlur={(e) => onUpdateField(['supplements', idx.toString(), 'name'], e.currentTarget.innerText)} contentEditable suppressContentEditableWarning className="outline-none">{sup.name}</span>
+                    </td>
+                    <td className={`${isMobile ? 'text-sm px-3 py-2' : 'text-base px-5 py-3'}`} style={{ borderBottom: `1px solid ${selectedTheme.primary}20` }}>
+                      <span onBlur={(e) => onUpdateField(['supplements', idx.toString(), 'usage'], e.currentTarget.innerText)} contentEditable suppressContentEditableWarning className="outline-none">{sup.usage}</span>
+                    </td>
+                    <td className="text-center export-hidden" style={{ borderBottom: `1px solid ${selectedTheme.primary}20` }}>
+                      <button onClick={() => {
+                        if (!workoutData.supplements) return;
+                        const newSupps = [...workoutData.supplements];
+                        newSupps.splice(idx, 1);
+                        onUpdateField(['supplements'], JSON.stringify(newSupps));
+                      }} className="text-red-400 opacity-0 hover:opacity-100 transition-all"><Trash2 size={16} /></button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <button onClick={() => {
+              const newSupps = [...(workoutData.supplements || []), { name: 'مکمل جدید', usage: 'نحوه مصرف' }];
+              onUpdateField(['supplements'], JSON.stringify(newSupps));
+            }} className="mt-4 w-full border-2 border-dashed rounded-2xl flex items-center justify-center gap-2 opacity-30 hover:opacity-100 py-3 text-[13px] font-black export-hidden transition-all active:scale-95" style={{ borderColor: selectedTheme.accent + '40', color: selectedTheme.text }}>
+              <Plus size={18} /> افزودن مکمل
+            </button>
+          </div>
+        )}
 
         {/* Tips */}
         {workoutData.tips && (
