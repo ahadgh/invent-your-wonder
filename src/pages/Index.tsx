@@ -113,6 +113,12 @@ const Index: React.FC = () => {
     if (!workoutData) return;
     recordChange();
     const newData = JSON.parse(JSON.stringify(workoutData));
+    // Special case: supplements array replacement
+    if (path.length === 1 && path[0] === 'supplements') {
+      try { newData.supplements = JSON.parse(value); } catch { return; }
+      setWorkoutData(newData);
+      return;
+    }
     let curr: any = newData;
     for (let i = 0; i < path.length - 1; i++) curr = curr[path[i]];
     curr[path[path.length - 1]] = value;
@@ -377,6 +383,14 @@ const Index: React.FC = () => {
       });
       text += `\n`;
     });
+    if (workoutData.supplements && workoutData.supplements.length > 0) {
+      text += `--------------------------------\n`;
+      text += `💊 مکمل‌های پیشنهادی:\n`;
+      workoutData.supplements.forEach((sup, idx) => {
+        text += `${idx + 1}. ${sup.name}: ${sup.usage}\n`;
+      });
+      text += `\n`;
+    }
     if (workoutData.tips) {
       text += `--------------------------------\n`;
       text += `💡 نکات طلایی:\n${workoutData.tips}\n\n`;

@@ -5,6 +5,11 @@ export interface Exercise {
   rest: string;
 }
 
+export interface Supplement {
+  name: string;
+  usage: string;
+}
+
 export interface WorkoutDay {
   dayName: string;
   exercises: Exercise[];
@@ -19,6 +24,7 @@ export interface WorkoutRoutine {
   studentBMI?: string;
   studentGoal?: string;
   days: WorkoutDay[];
+  supplements?: Supplement[];
   tips?: string;
 }
 
