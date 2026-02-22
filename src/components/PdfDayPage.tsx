@@ -10,10 +10,12 @@ interface PdfDayPageProps {
   nextProgramDate: string;
   isFirstPage: boolean;
   isLastPage: boolean;
+  whatsappNumber?: string;
+  whatsappEnabled?: boolean;
 }
 
 const PdfDayPage: React.FC<PdfDayPageProps> = ({
-  days, startIndex, workoutData, theme, nextProgramDate, isFirstPage, isLastPage
+  days, startIndex, workoutData, theme, nextProgramDate, isFirstPage, isLastPage, whatsappNumber, whatsappEnabled
 }) => {
   const isMeal = workoutData.type === 'meal';
   const decorIcons = [Flame, Heart, Zap, Target, Trophy];
@@ -265,7 +267,7 @@ const PdfDayPage: React.FC<PdfDayPageProps> = ({
       )}
 
       {/* Footer - only on last page */}
-      {isLastPage && (
+      {isLastPage && whatsappEnabled !== false && whatsappNumber && (
         <div style={{
           marginTop: 'auto', paddingTop: '20px', borderTop: `2px dashed ${theme.primary}30`,
           display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px',
@@ -278,7 +280,7 @@ const PdfDayPage: React.FC<PdfDayPageProps> = ({
             <div style={{ padding: '5px', borderRadius: '8px', backgroundColor: '#25D366' }}>
               <Phone size={18} color="white" fill="white" />
             </div>
-            <span style={{ fontSize: '24px', fontWeight: 900, letterSpacing: '3px', direction: 'ltr' }}>0998 220 2734</span>
+            <span style={{ fontSize: '24px', fontWeight: 900, letterSpacing: '3px', direction: 'ltr' }}>{whatsappNumber}</span>
           </div>
         </div>
       )}
