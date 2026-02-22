@@ -9,7 +9,7 @@ import {
   Dumbbell, Download, Palette, Loader2,
   FileText, ChevronDown, Sparkles,
   Smartphone, Monitor, Undo2, Redo2,
-  Coffee, Utensils, FileDown, Image as ImageIcon, FileType
+  Coffee, Utensils, FileDown, Image as ImageIcon, FileType, Phone
 } from 'lucide-react';
 import jsPDF from 'jspdf';
 import { useToast } from '@/hooks/use-toast';
@@ -38,6 +38,8 @@ const Index: React.FC = () => {
   const [future, setFuture] = useState<WorkoutRoutine[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [dragInfo, setDragInfo] = useState<{ dayIdx: number; exIdx: number } | null>(null);
+  const [whatsappNumber, setWhatsappNumber] = useState('0998 220 2734');
+  const [whatsappEnabled, setWhatsappEnabled] = useState(true);
   const previewRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -306,6 +308,8 @@ const Index: React.FC = () => {
             nextProgramDate={nextProgramDate}
             isFirstPage={pIdx === 0}
             isLastPage={pIdx === pageGroups.length - 1}
+            whatsappNumber={whatsappNumber}
+            whatsappEnabled={whatsappEnabled}
           />
         );
 
@@ -395,9 +399,11 @@ const Index: React.FC = () => {
       text += `--------------------------------\n`;
       text += `💡 نکات طلایی:\n${workoutData.tips}\n\n`;
     }
-    text += `--------------------------------\n`;
-    text += `📲 جهت تمدید و دریافت برنامه جدید پیام بدهید:\n`;
-    text += `📞 0998 220 2734\n`;
+    if (whatsappEnabled) {
+      text += `--------------------------------\n`;
+      text += `📲 جهت تمدید و دریافت برنامه جدید پیام بدهید:\n`;
+      text += `📞 ${whatsappNumber}\n`;
+    }
     const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -481,6 +487,27 @@ const Index: React.FC = () => {
               ))}
             </div>
           </section>
+
+          {/* WhatsApp Settings */}
+          <section className="bg-card p-6 rounded-3xl border shadow-xl space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="font-black text-xl flex items-center gap-2 text-foreground"><Phone className="text-primary" /> واتساپ</h2>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" checked={whatsappEnabled} onChange={(e) => setWhatsappEnabled(e.target.checked)} className="sr-only peer" />
+                <div className="w-11 h-6 bg-secondary rounded-full peer peer-checked:bg-primary transition-colors after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-background after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full"></div>
+              </label>
+            </div>
+            {whatsappEnabled && (
+              <input
+                type="text"
+                value={whatsappNumber}
+                onChange={(e) => setWhatsappNumber(e.target.value)}
+                className="w-full p-3 border-2 border-secondary rounded-xl focus:border-primary outline-none text-center bg-secondary/30 text-lg font-bold tracking-wider text-foreground"
+                style={{ direction: 'ltr' }}
+                placeholder="شماره واتساپ"
+              />
+            )}
+          </section>
         </div>
 
         {/* Preview Area */}
@@ -509,6 +536,8 @@ const Index: React.FC = () => {
                 onPointerDown={handlePointerDown}
                 onPointerMove={handlePointerMove}
                 onPointerUp={handlePointerUp}
+                whatsappNumber={whatsappNumber}
+                whatsappEnabled={whatsappEnabled}
               />
             ) : (
               <div className="flex flex-col items-center justify-center text-muted-foreground gap-8 p-20 text-center animate-pulse">

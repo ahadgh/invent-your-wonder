@@ -16,12 +16,15 @@ interface WorkoutPreviewProps {
   onPointerDown: (e: React.PointerEvent, dayIdx: number, exIdx: number) => void;
   onPointerMove: (e: React.PointerEvent) => void;
   onPointerUp: (e: React.PointerEvent) => void;
+  whatsappNumber: string;
+  whatsappEnabled: boolean;
 }
 
 const WorkoutPreview: React.FC<WorkoutPreviewProps> = ({
   workoutData, selectedTheme, previewMode, previewRef,
   onUpdateField, onAddExercise, onRemoveExercise,
-  onPointerDown, onPointerMove, onPointerUp
+  onPointerDown, onPointerMove, onPointerUp,
+  whatsappNumber, whatsappEnabled
 }) => {
   const isMobile = previewMode === 'mobile';
 
@@ -165,35 +168,37 @@ const WorkoutPreview: React.FC<WorkoutPreviewProps> = ({
         {workoutData.supplements && workoutData.supplements.length > 0 && (
           <div className={`w-full ${isMobile ? 'mt-10 p-7 rounded-[30px]' : 'mt-20 p-14 rounded-[50px]'} border-r-[12px] shadow-2xl relative transition-all duration-300`} style={{ backgroundColor: selectedTheme.secondary, borderColor: selectedTheme.primary }}>
             <h4 className="flex items-center gap-3 font-black text-2xl mb-5" style={{ color: selectedTheme.primary }}><Pill size={28} /> مکمل‌های پیشنهادی</h4>
-            <table className="w-full" style={{ borderCollapse: 'collapse' }}>
-              <thead>
-                <tr>
-                  <th className={`text-right font-black ${isMobile ? 'text-sm px-3 py-2' : 'text-lg px-5 py-3'}`} style={{ backgroundColor: selectedTheme.primary, color: selectedTheme.tableHeaderColor, borderRadius: '8px 0 0 0' }}>مکمل</th>
-                  <th className={`text-right font-black ${isMobile ? 'text-sm px-3 py-2' : 'text-lg px-5 py-3'}`} style={{ backgroundColor: selectedTheme.primary, color: selectedTheme.tableHeaderColor, borderRadius: '0 8px 0 0' }}>نحوه مصرف</th>
-                  <th className="w-10 export-hidden" style={{ backgroundColor: selectedTheme.primary, borderRadius: '0' }}></th>
-                </tr>
-              </thead>
-              <tbody>
-                {workoutData.supplements.map((sup, idx) => (
-                  <tr key={idx} style={{ backgroundColor: idx % 2 === 0 ? selectedTheme.rowEven : selectedTheme.rowOdd }}>
-                    <td className={`font-bold ${isMobile ? 'text-sm px-3 py-2' : 'text-base px-5 py-3'}`} style={{ borderBottom: `1px solid ${selectedTheme.primary}20` }}>
-                      <span onBlur={(e) => onUpdateField(['supplements', idx.toString(), 'name'], e.currentTarget.innerText)} contentEditable suppressContentEditableWarning className="outline-none">{sup.name}</span>
-                    </td>
-                    <td className={`${isMobile ? 'text-sm px-3 py-2' : 'text-base px-5 py-3'}`} style={{ borderBottom: `1px solid ${selectedTheme.primary}20` }}>
-                      <span onBlur={(e) => onUpdateField(['supplements', idx.toString(), 'usage'], e.currentTarget.innerText)} contentEditable suppressContentEditableWarning className="outline-none">{sup.usage}</span>
-                    </td>
-                    <td className="text-center export-hidden" style={{ borderBottom: `1px solid ${selectedTheme.primary}20` }}>
-                      <button onClick={() => {
-                        if (!workoutData.supplements) return;
-                        const newSupps = [...workoutData.supplements];
-                        newSupps.splice(idx, 1);
-                        onUpdateField(['supplements'], JSON.stringify(newSupps));
-                      }} className="text-red-400 opacity-0 hover:opacity-100 transition-all"><Trash2 size={16} /></button>
-                    </td>
+            <div className="w-full overflow-hidden" style={{ borderRadius: '12px', border: `2px solid ${selectedTheme.primary}30` }}>
+              <table className="w-full" style={{ borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr>
+                    <th className={`text-right font-black ${isMobile ? 'text-sm px-3 py-2' : 'text-lg px-5 py-3'}`} style={{ backgroundColor: selectedTheme.primary, color: selectedTheme.tableHeaderColor }}>مکمل</th>
+                    <th className={`text-right font-black ${isMobile ? 'text-sm px-3 py-2' : 'text-lg px-5 py-3'}`} style={{ backgroundColor: selectedTheme.primary, color: selectedTheme.tableHeaderColor }}>زمان و نحوه مصرف</th>
+                    <th className="w-10 export-hidden" style={{ backgroundColor: selectedTheme.primary }}></th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {workoutData.supplements.map((sup, idx) => (
+                    <tr key={idx} style={{ backgroundColor: idx % 2 === 0 ? selectedTheme.rowEven : selectedTheme.rowOdd }}>
+                      <td className={`font-bold ${isMobile ? 'text-sm px-3 py-2' : 'text-base px-5 py-3'}`} style={{ borderBottom: `1px solid ${selectedTheme.primary}20` }}>
+                        <span onBlur={(e) => onUpdateField(['supplements', idx.toString(), 'name'], e.currentTarget.innerText)} contentEditable suppressContentEditableWarning className="outline-none">{sup.name}</span>
+                      </td>
+                      <td className={`${isMobile ? 'text-sm px-3 py-2' : 'text-base px-5 py-3'}`} style={{ borderBottom: `1px solid ${selectedTheme.primary}20` }}>
+                        <span onBlur={(e) => onUpdateField(['supplements', idx.toString(), 'usage'], e.currentTarget.innerText)} contentEditable suppressContentEditableWarning className="outline-none">{sup.usage}</span>
+                      </td>
+                      <td className="text-center export-hidden" style={{ borderBottom: `1px solid ${selectedTheme.primary}20` }}>
+                        <button onClick={() => {
+                          if (!workoutData.supplements) return;
+                          const newSupps = [...workoutData.supplements];
+                          newSupps.splice(idx, 1);
+                          onUpdateField(['supplements'], JSON.stringify(newSupps));
+                        }} className="text-red-400 opacity-0 hover:opacity-100 transition-all"><Trash2 size={16} /></button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
             <button onClick={() => {
               const newSupps = [...(workoutData.supplements || []), { name: 'مکمل جدید', usage: 'نحوه مصرف' }];
               onUpdateField(['supplements'], JSON.stringify(newSupps));
@@ -212,17 +217,19 @@ const WorkoutPreview: React.FC<WorkoutPreviewProps> = ({
         )}
 
         {/* Footer */}
-        <div className={`w-full ${isMobile ? 'mt-10 p-8' : 'mt-20 p-12'} border-2 border-dashed rounded-[34px] flex flex-col items-center justify-center gap-3 text-center transition-all duration-300`} style={{ borderColor: selectedTheme.primary + '20', color: selectedTheme.primary }}>
-          <div className="flex items-center gap-2 font-black text-[13px] opacity-70">
-            <MessageCircle size={18} /> <span>دریافت و تمدید برنامه واتساپ</span>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="p-2 rounded-xl text-white shadow-md" style={{ backgroundColor: '#25D366' }}>
-              <Phone size={isMobile ? 20 : 32} fill="white" />
+        {whatsappEnabled && (
+          <div className={`w-full ${isMobile ? 'mt-10 p-8' : 'mt-20 p-12'} border-2 border-dashed rounded-[34px] flex flex-col items-center justify-center gap-3 text-center transition-all duration-300`} style={{ borderColor: selectedTheme.primary + '20', color: selectedTheme.primary }}>
+            <div className="flex items-center gap-2 font-black text-[13px] opacity-70">
+              <MessageCircle size={18} /> <span>دریافت و تمدید برنامه واتساپ</span>
             </div>
-            <div className={`${isMobile ? 'text-3xl' : 'text-[56px]'} font-black tracking-[4px]`} style={{ direction: 'ltr' }}>0998 220 2734</div>
+            <div className="flex items-center gap-4">
+              <div className="p-2 rounded-xl text-white shadow-md" style={{ backgroundColor: '#25D366' }}>
+                <Phone size={isMobile ? 20 : 32} fill="white" />
+              </div>
+              <div className={`${isMobile ? 'text-3xl' : 'text-[56px]'} font-black tracking-[4px]`} style={{ direction: 'ltr' }}>{whatsappNumber}</div>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
