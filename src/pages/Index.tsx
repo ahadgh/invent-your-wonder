@@ -250,44 +250,17 @@ const Index: React.FC = () => {
       const totalDays = workoutData.days.length;
       const isMealType = workoutData.type === 'meal';
 
-      // Group days into pages: for 5 or fewer days, force exactly 2 pages
+      // Group days into pages: maximum 2 training days per page
       const pageGroups: { days: typeof workoutData.days; startIndex: number }[] = [];
-      
-      if (totalDays <= 5 && totalDays > 1) {
-        // Force 2 pages: first page gets ceil(totalDays/2), second gets the rest
-        const firstPageCount = Math.ceil(totalDays / 2);
+      const DAYS_PER_PAGE = 2;
+      for (let i = 0; i < totalDays; i += DAYS_PER_PAGE) {
         pageGroups.push({
-          days: workoutData.days.slice(0, firstPageCount),
-          startIndex: 0
+          days: workoutData.days.slice(i, i + DAYS_PER_PAGE),
+          startIndex: i,
         });
-        pageGroups.push({
-          days: workoutData.days.slice(firstPageCount),
-          startIndex: firstPageCount
-        });
-      } else if (totalDays === 1) {
+      }
+      if (pageGroups.length === 0) {
         pageGroups.push({ days: workoutData.days, startIndex: 0 });
-      } else {
-        // For 6+ days, use packing algorithm
-        const rowHeight = isMealType ? 42 : 46;
-        const dayOverhead = 80;
-        const headerHeight = 240;
-        const pageUsableH = 1400;
-        let currentGroup: number[] = [];
-        let currentH = headerHeight;
-        for (let i = 0; i < totalDays; i++) {
-          const estH = workoutData.days[i].exercises.length * rowHeight + dayOverhead;
-          if (currentGroup.length > 0 && currentH + estH > pageUsableH) {
-            pageGroups.push({ days: currentGroup.map(idx => workoutData.days[idx]), startIndex: currentGroup[0] });
-            currentGroup = [i];
-            currentH = estH;
-          } else {
-            currentGroup.push(i);
-            currentH += estH;
-          }
-        }
-        if (currentGroup.length > 0) {
-          pageGroups.push({ days: currentGroup.map(idx => workoutData.days[idx]), startIndex: currentGroup[0] });
-        }
       }
 
       for (let pIdx = 0; pIdx < pageGroups.length; pIdx++) {
