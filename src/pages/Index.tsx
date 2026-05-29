@@ -259,14 +259,6 @@ const Index: React.FC = () => {
           startIndex: i,
         });
       }
-      // For meals: ensure last page has at most 3 days
-      if (isMealType && pageGroups.length > 0) {
-        const last = pageGroups[pageGroups.length - 1];
-        if (last.days.length === DAYS_PER_PAGE) {
-          const moved = last.days.pop()!;
-          pageGroups.push({ days: [moved], startIndex: last.startIndex + last.days.length });
-        }
-      }
       if (pageGroups.length === 0) {
         pageGroups.push({ days: workoutData.days, startIndex: 0 });
       }
