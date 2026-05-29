@@ -250,7 +250,7 @@ const Index: React.FC = () => {
       const totalDays = workoutData.days.length;
       const isMealType = workoutData.type === 'meal';
 
-      // Group days into pages: meals → 4 per page (last page max 3); workouts → 2 per page
+      // Group days into pages: meals → 4 per page; workouts → 2 per page
       const pageGroups: { days: typeof workoutData.days; startIndex: number }[] = [];
       const DAYS_PER_PAGE = isMealType ? 4 : 2;
       for (let i = 0; i < totalDays; i += DAYS_PER_PAGE) {
