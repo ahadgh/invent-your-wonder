@@ -250,14 +250,22 @@ const Index: React.FC = () => {
       const totalDays = workoutData.days.length;
       const isMealType = workoutData.type === 'meal';
 
-      // Group days into pages: maximum 2 training days per page
+      // Group days into pages: meals → 4 per page (last page max 3); workouts → 2 per page
       const pageGroups: { days: typeof workoutData.days; startIndex: number }[] = [];
-      const DAYS_PER_PAGE = 2;
+      const DAYS_PER_PAGE = isMealType ? 4 : 2;
       for (let i = 0; i < totalDays; i += DAYS_PER_PAGE) {
         pageGroups.push({
           days: workoutData.days.slice(i, i + DAYS_PER_PAGE),
           startIndex: i,
         });
+      }
+      // For meals: ensure last page has at most 3 days
+      if (isMealType && pageGroups.length > 0) {
+        const last = pageGroups[pageGroups.length - 1];
+        if (last.days.length === DAYS_PER_PAGE) {
+          const moved = last.days.pop()!;
+          pageGroups.push({ days: [moved], startIndex: last.startIndex + last.days.length });
+        }
       }
       if (pageGroups.length === 0) {
         pageGroups.push({ days: workoutData.days, startIndex: 0 });
