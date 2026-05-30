@@ -161,20 +161,20 @@ const PdfDayPage: React.FC<PdfDayPageProps> = ({
               {/* Table */}
               {isMeal ? (
                 <table style={{
-                  width: '100%', borderCollapse: 'collapse', fontSize: '14px',
+                  width: '100%', borderCollapse: 'collapse', fontSize: '14px', tableLayout: 'auto',
                   border: `2px solid ${theme.primary}30`, borderRadius: '10px', overflow: 'hidden',
                 }}>
                   <thead>
                     <tr>
-                      <th style={{ ...thStyle(theme), width: '40px' }}>#</th>
-                      <th style={{ ...thStyle(theme), width: '160px' }}>عنوان</th>
+                      <th style={{ ...thStyle(theme), whiteSpace: 'nowrap' }}>#</th>
+                      <th style={{ ...thStyle(theme), whiteSpace: 'nowrap' }}>عنوان</th>
                       <th style={thStyle(theme)}>شرح</th>
                     </tr>
                   </thead>
                   <tbody>
                     {day.exercises.map((ex, idx) => (
                       <tr key={idx} style={{ backgroundColor: idx % 2 === 0 ? theme.rowEven : theme.rowOdd }}>
-                        <td style={{ ...tdStyle(theme), textAlign: 'center', fontWeight: 800, color: theme.primary }}>{idx + 1}</td>
+                        <td style={{ ...tdStyle(theme), textAlign: 'center', fontWeight: 800, color: theme.primary, whiteSpace: 'nowrap' }}>{idx + 1}</td>
                         <td style={{ ...tdStyle(theme), fontWeight: 800, color: theme.primary }}>{ex.name}</td>
                         <td style={{ ...tdStyle(theme), lineHeight: 1.7 }}>{ex.sets}</td>
                       </tr>
@@ -183,22 +183,22 @@ const PdfDayPage: React.FC<PdfDayPageProps> = ({
                 </table>
               ) : (
                 <table style={{
-                  width: '100%', borderCollapse: 'collapse', fontSize: '14px',
+                  width: '100%', borderCollapse: 'collapse', fontSize: '14px', tableLayout: 'auto',
                   border: `2px solid ${theme.primary}30`, borderRadius: '10px', overflow: 'hidden',
                 }}>
                   <thead>
                     <tr>
-                      <th style={{ ...thStyle(theme), width: '40px' }}>#</th>
+                      <th style={{ ...thStyle(theme), whiteSpace: 'nowrap' }}>#</th>
                       <th style={thStyle(theme)}>نام حرکت</th>
-                      <th style={{ ...thStyle(theme), width: '80px' }}>ست</th>
-                      <th style={{ ...thStyle(theme), width: '80px' }}>تکرار</th>
-                      <th style={{ ...thStyle(theme), width: '100px' }}>استراحت</th>
+                      <th style={{ ...thStyle(theme), whiteSpace: 'nowrap' }}>ست</th>
+                      <th style={{ ...thStyle(theme), whiteSpace: 'nowrap' }}>تکرار</th>
+                      <th style={{ ...thStyle(theme), whiteSpace: 'nowrap' }}>استراحت</th>
                     </tr>
                   </thead>
                   <tbody>
                     {day.exercises.map((ex, idx) => (
                       <tr key={idx} style={{ backgroundColor: idx % 2 === 0 ? theme.rowEven : theme.rowOdd }}>
-                        <td style={{ ...tdStyle(theme), textAlign: 'center', fontWeight: 800, color: theme.primary }}>{idx + 1}</td>
+                        <td style={{ ...tdStyle(theme), textAlign: 'center', fontWeight: 800, color: theme.primary, whiteSpace: 'nowrap' }}>{idx + 1}</td>
                         <td style={{ ...tdStyle(theme), fontWeight: 800, color: theme.primary }}>
                           <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
                             <Dumbbell size={12} color={theme.primary} style={{ opacity: 0.4, flexShrink: 0 }} />
