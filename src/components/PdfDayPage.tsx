@@ -228,10 +228,10 @@ const PdfDayPage: React.FC<PdfDayPageProps> = ({
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 900, fontSize: '18px', color: theme.primary, marginBottom: '10px' }}>
             <Pill size={18} /> مکمل‌های پیشنهادی
           </div>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px', border: `2px solid ${theme.primary}30`, borderRadius: '10px', overflow: 'hidden' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px', tableLayout: 'auto', border: `2px solid ${theme.primary}30`, borderRadius: '10px', overflow: 'hidden' }}>
             <thead>
               <tr>
-                <th style={{ ...thStyle(theme), width: '200px' }}>مکمل</th>
+                <th style={{ ...thStyle(theme), whiteSpace: 'nowrap' }}>مکمل</th>
                 <th style={thStyle(theme)}>نحوه مصرف</th>
               </tr>
             </thead>
